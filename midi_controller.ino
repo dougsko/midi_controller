@@ -26,7 +26,6 @@
 int latchPin = 8;
 int dataPin = 9;
 int clockPin = 7;
-
 int special = 2;
 
 //Define variables to hold the data 
@@ -34,11 +33,10 @@ int special = 2;
 //starting with a non-zero numbers can help
 //troubleshoot
 byte switchVar1 = 72;  //01001000
+byte switchVar2 = 72;
  
-int midiNote[] = {
- 0x35, 0x36, 0x37, 0x38, 0x39, 0x40, 0x41}; 
-
-int state = HIGH;
+int state1 = HIGH;
+int state2 = HIGH;
 int specialState = LOW;
 
 void setup() {
@@ -69,107 +67,169 @@ void loop() {
   //collect each shift register into a byte
   //the register attached to the chip comes in first 
   switchVar1 = shiftIn(dataPin, clockPin);
-  if(state != switchVar1) {
-    state = switchVar1;
+  swicthVar2 = shiftIn(dataPin, clockPin);
+
+  if(state1 != switchVar1 || state2 != switchVar2) {
+    state1 = switchVar1;
+    state2 = switchVar2;
   
     // debug
     //Serial.println(switchVar1, BIN);
+    //Serial.println(switchVar2, BIN);
     
     switch (switchVar1) {
       case 0B00000001:
         if(specialState == LOW)
         {
-          noteOn(0x90, 0x35, 0x45);
-          noteOn(0xb0, 0x6e, 0x00);
+          noteOn(1);
+          sliderLeft();
         }
         else
-          noteOn(0x90, 0x39, 0x45);
+          noteOn(5);
         break;
       case 0B00000010:
         if(specialState == LOW)
         {
-          noteOn(0x90, 0x36, 0x45);
-          noteOn(0xb0, 0x6e, 0x00);
+          noteOn(2);
+          sliderLeft();
         }
         else
-          noteOn(0x90, 0x3a, 0x45);
+          noteOn(6);
         break;
       case 0B00000100:
         if(specialState == LOW) 
         {
-          noteOn(0x90, 0x37, 0x45);
-          noteOn(0xb0, 0x6e, 0x7f);
+          noteOn(3);
+          sliderRight();
         }
         else
-          noteOn(0x90, 0x3b, 0x45);
+          noteOn(7);
         break;
       case 0B00001000:
         if(specialState == LOW)
         {
-          noteOn(0x90, 0x38, 0x45);
-          noteOn(0xb0, 0x6e, 0x7f);
+          noteOn(4);
+          sliderRight();
         }
         else
-          noteOn(0x90, 0x3c, 0x45);
+          noteOn(8);
+        break;
+      case 0B00010000:
+        if(specialState == LOW)
+        {
+          noteOn(5);
+          sliderRight();
+        }
+        else
+          noteOn(9);
+        break;
+      case 0B00100000:
+        if(specialState == LOW)
+        {
+          noteOn(6);
+          sliderRight();
+        }
+        else
+          noteOn(10);
+        break;
+      case 0B01000000:
+        if(specialState == LOW)
+        {
+          noteOn(7);
+          sliderRight();
+        }
+        else
+          noteOn(11);
+        break;
+      case 0B10000000:
+        if(specialState == LOW)
+        {
+          noteOn(8);
+          sliderRight();
+        }
+        else
+          noteOn(12);
+        break;
+      default:
+        break;
+    }
+
+    switch (switchVar2) {
+      case 0B00000001:
+        if(specialState == LOW)
+        {
+          noteOn(9);
+          sliderLeft();
+        }
+        else
+          noteOn(13);
+        break;
+      case 0B00000010:
+        if(specialState == LOW)
+        {
+          noteOn(10);
+          sliderLeft();
+        }
+        else
+          noteOn(14);
+        break;
+      case 0B00000100:
+        if(specialState == LOW) 
+        {
+          noteOn(11);
+          sliderRight();
+        }
+        else
+          noteOn(15);
+        break;
+      case 0B00001000:
+        if(specialState == LOW)
+        {
+          noteOn(12);
+          sliderRight();
+        }
+        else
+          noteOn(16);
+        break;
+      case 0B00010000:
+        if(specialState == LOW)
+        {
+          noteOn(13);
+          sliderRight();
+        }
+        else
+          noteOn(17);
+        break;
+      case 0B00100000:
+        if(specialState == LOW)
+        {
+          noteOn(14);
+          sliderRight();
+        }
+        else
+          noteOn(18);
+        break;
+      case 0B01000000:
+        if(specialState == LOW)
+        {
+          noteOn(15);
+          sliderRight();
+        }
+        else
+          noteOn(19);
+        break;
+      case 0B10000000:
+        if(specialState == LOW)
+        {
+          noteOn(16);
+          sliderRight();
+        }
+        else
+          noteOn(20);
         break;
       default:
         break;
     }
   }
   delay(10);
-}
-
-//  plays a MIDI note.  Doesn't check to see that
-//  cmd is greater than 127, or that data values are  less than 127:
-void noteOn(int cmd, int pitch, int velocity) {
-  Serial.write(cmd);
-  Serial.write(pitch);
-  Serial.write(velocity);
-}
-
-byte shiftIn(int myDataPin, int myClockPin) { 
-  int i;
-  int temp = 0;
-  int pinState;
-  byte myDataIn = 0;
-
-  pinMode(myClockPin, OUTPUT);
-  pinMode(myDataPin, INPUT);
-//we will be holding the clock pin high 8 times (0,..,7) at the
-//end of each time through the for loop
-
-//at the begining of each loop when we set the clock low, it will
-//be doing the necessary low to high drop to cause the shift
-//register's DataPin to change state based on the value
-//of the next bit in its serial information flow.
-//The register transmits the information about the pins from pin 7 to pin 0
-//so that is why our function counts down
-  for (i=7; i>=0; i--)
-  {
-    digitalWrite(myClockPin, 0);
-    delayMicroseconds(0.2);
-    temp = digitalRead(myDataPin);
-    if (temp) {
-      pinState = 1;
-      //set the bit to 0 no matter what
-      myDataIn = myDataIn | (1 << i);
-    }
-    else {
-      //turn it off -- only necessary for debuging
-     //print statement since myDataIn starts as 0
-      pinState = 0;
-    }
-
-    //Debuging print statements
-    //Serial.print(pinState);
-    //Serial.print("     ");
-    //Serial.println (dataIn, BIN);
-
-    digitalWrite(myClockPin, 1);
-
-  }
-  //debuging print statements whitespace
-  //Serial.println();
-  //Serial.println(myDataIn, BIN);
-  return myDataIn;
 }
