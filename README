@@ -2,9 +2,9 @@ This is an Arduino project for a Midi Fighter type midi controller.
 
 Files
 -----
-*midi_controller.ino* - This is the main Arduino sketch.
-*midi.ino* - Midi related functions can be found here.
-*shiftin.ino* - Contains the function used to read the 4021 shift
+midi_controller.ino - This is the main Arduino sketch.
+midi.ino - Midi related functions can be found here.
+shiftin.ino - Contains the function used to read the 4021 shift
 register.
 
 Templates to mount the 35mm arcade-style buttons used in the project can
