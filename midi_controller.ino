@@ -27,37 +27,30 @@ int latchPin = 8;
 int dataPin = 9;
 int clockPin = 7;
 
+int special = 2;
+
 //Define variables to hold the data 
 //for shift register.
 //starting with a non-zero numbers can help
 //troubleshoot
 byte switchVar1 = 72;  //01001000
-
-//define an array that corresponds to values for each 
-//of the shift register's pins
-//
-char note2sing[] = {
-  'C', 'd', 'e', 'f', 'g', 'a', 'b', 'c'};
  
 int midiNote[] = {
- 0x35, 0x36, 0x37, 0x38}; 
+ 0x35, 0x36, 0x37, 0x38, 0x39, 0x40, 0x41}; 
 
 int state = HIGH;
-
-// the following variables are long's because the time, measured in miliseconds,
-// will quickly become a bigger number than can be stored in an int.
-//long lastDebounceTime = 0;  // the last time the output pin was toggled
-//long debounceDelay = 10;    // the debounce time; increase if the output flickers
+int specialState = LOW;
 
 void setup() {
   //  Set MIDI baud rate:
-  //Serial.begin(31250);
-  Serial.begin(9600);
+  Serial.begin(31250);
+  //Serial.begin(9600);
   
   //define pin modes
   pinMode(latchPin, OUTPUT);
   pinMode(clockPin, OUTPUT); 
   pinMode(dataPin, INPUT);
+  pinMode(special, INPUT);
 }
 
 void loop() {
@@ -69,6 +62,9 @@ void loop() {
   //set it to 0 to transmit data serially  
   digitalWrite(latchPin,0);
   
+  specialState = digitalRead(special);
+  //Serial.println(specialState);
+  
   //while the shift register is in serial mode
   //collect each shift register into a byte
   //the register attached to the chip comes in first 
@@ -78,22 +74,46 @@ void loop() {
   
     // debug
     //Serial.println(switchVar1, BIN);
-  
-    //This for-loop steps through the byte
-    //bit by bit which holds the shift register data 
-    //and if it was high (1) then it prints
-    //the corresponding location in the array
-    for (int n=0; n<=7; n++)
-    {
-      //so, when n is 3, it compares the bits
-      //in switchVar1 and the binary number 00001000
-      //which will only return true if there is a 
-      //1 in that bit (ie that pin) from the shift
-      //register.
-      if (switchVar1 & (1 << n) ){      
-        Serial.println(note2sing[n]);
-        //noteOn(0x90, midiNote[n], 0x45);
-      }
+    
+    switch (switchVar1) {
+      case 0B00000001:
+        if(specialState == LOW)
+        {
+          noteOn(0x90, 0x35, 0x45);
+          noteOn(0xb0, 0x6e, 0x00);
+        }
+        else
+          noteOn(0x90, 0x39, 0x45);
+        break;
+      case 0B00000010:
+        if(specialState == LOW)
+        {
+          noteOn(0x90, 0x36, 0x45);
+          noteOn(0xb0, 0x6e, 0x00);
+        }
+        else
+          noteOn(0x90, 0x3a, 0x45);
+        break;
+      case 0B00000100:
+        if(specialState == LOW) 
+        {
+          noteOn(0x90, 0x37, 0x45);
+          noteOn(0xb0, 0x6e, 0x7f);
+        }
+        else
+          noteOn(0x90, 0x3b, 0x45);
+        break;
+      case 0B00001000:
+        if(specialState == LOW)
+        {
+          noteOn(0x90, 0x38, 0x45);
+          noteOn(0xb0, 0x6e, 0x7f);
+        }
+        else
+          noteOn(0x90, 0x3c, 0x45);
+        break;
+      default:
+        break;
     }
   }
   delay(10);
